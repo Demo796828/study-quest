@@ -1,0 +1,1030 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Quest</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d1220;
+    color: white;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 25px 15px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+header h1 {
+    color: #8d83ff;
+    font-size: 35px;
+}
+
+header p { color: #aab3c5; }
+
+.card {
+    background: #171f32;
+    border: 1px solid #2b3852;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
+h2 {
+    color: #8d83ff;
+    margin-top: 0;
+}
+
+.timer { text-align: center; }
+
+#clock {
+    font-size: 75px;
+    font-weight: bold;
+    margin: 20px 0;
+    font-variant-numeric: tabular-nums;
+}
+
+button, select, input {
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 5px;
+    font-size: 15px;
+}
+
+button {
+    background: #7468ed;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover { opacity: .85; }
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.secondary { background: #303c55; }
+.green { background: #18875d; }
+.red { background: #a83c53; }
+
+select, input {
+    background: #263149;
+    color: white;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.stat {
+    background: #222d43;
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 25px;
+    color: #62d9d1;
+    margin-bottom: 7px;
+}
+
+.progress {
+    height: 12px;
+    background: #303c55;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+.progress div {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #7468ed, #62d9d1);
+    transition: width .3s;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.subject { margin: 13px 0; }
+
+.subject-bar {
+    height: 8px;
+    background: #303c55;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.subject-bar div {
+    height: 100%;
+    background: #62d9d1;
+}
+
+.achievement {
+    background: #222d43;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+}
+
+.achievement small { color: #aab3c5; }
+
+.history-item {
+    border-bottom: 1px solid #303c55;
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+.history-item small {
+    display: block;
+    color: #aab3c5;
+    margin-top: 5px;
+}
+
+#toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #263149;
+    border: 1px solid #62d9d1;
+    padding: 12px 18px;
+    border-radius: 12px;
+    display: none;
+    z-index: 10;
+    text-align: center;
+}
+
+@media(max-width:600px) {
+    #clock { font-size: 55px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>⚡ Study Quest</h1>
+    <p>Every Second Counts — رحلة الإنجاز</p>
+</header>
+
+<section class="card timer">
+
+    <h2>Focus Timer</h2>
+
+    <div id="clock">25:00</div>
+
+    <div class="progress">
+        <div id="timerProgress"></div>
+    </div>
+
+    <div>
+        <button class="secondary" onclick="setMode(25,5)">25 / 5</button>
+        <button class="secondary" onclick="setMode(50,10)">50 / 10</button>
+        <button class="secondary" onclick="setMode(60,15)">60 / 15</button>
+    </div>
+
+    <p>اختر المادة:</p>
+
+    <select id="subject">
+        <option>Math</option>
+        <option>Science</option>
+        <option>English</option>
+        <option>Arabic</option>
+        <option>Studies</option>
+        <option>Other</option>
+    </select>
+
+    <div>
+        <button class="green" id="startBtn" onclick="startTimer()">ابدأ</button>
+        <button class="secondary" onclick="pauseTimer()">إيقاف مؤقت</button>
+        <button class="red" onclick="resetTimer()">إنهاء الجلسة</button>
+    </div>
+
+    <div>
+        <button class="secondary" onclick="startBreak()">ابدأ الاستراحة</button>
+    </div>
+
+    <p id="timerStatus">جاهز للانطلاق!</p>
+
+</section>
+
+<section class="card">
+    <h2>🏆 Dashboard</h2>
+
+    <div class="stats">
+        <div class="stat">
+            <strong id="xp">0</strong>
+            XP
+        </div>
+
+        <div class="stat">
+            <strong id="totalHours">0h 00m</strong>
+            إجمالي المذاكرة
+        </div>
+
+        <div class="stat">
+            <strong id="examCount">0</strong>
+            امتحانات مكتملة
+        </div>
+
+        <div class="stat">
+            <strong id="achievementCount">0</strong>
+            إنجازات
+        </div>
+    </div>
+
+    <h3>Level: <span id="level">Beginner</span></h3>
+
+    <div class="progress">
+        <div id="levelProgress"></div>
+    </div>
+
+    <p id="levelText">0 XP</p>
+</section>
+
+<section class="card">
+    <h2>🎯 Daily Goal</h2>
+
+    <div class="row">
+        <label>هدفك اليومي بالساعات:</label>
+        <input type="number" id="dailyGoal" min="1" max="12" value="2">
+        <button onclick="saveGoal()">حفظ</button>
+    </div>
+
+    <p id="dailyProgressText">0 / 2 ساعة</p>
+
+    <div class="progress">
+        <div id="dailyProgress"></div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>📚 Subject Tracking</h2>
+    <div id="subjects"></div>
+</section>
+
+<section class="card">
+    <h2>🎖️ Challenges & Rewards</h2>
+
+    <button onclick="reward('homework')">
+        واجب كامل +15 XP
+    </button>
+
+    <button onclick="reward('lesson')">
+        إنهاء درس +20 XP
+    </button>
+
+    <button onclick="reward('exam')">
+        امتحان شامل +25 XP
+    </button>
+
+    <button onclick="reward('review')">
+        مراجعة الأخطاء +10 XP
+    </button>
+
+    <p style="color:#aab3c5;font-size:13px">
+        تُضاف المكافآت بعد إتمام النشاط وتصحيحه أو مراجعته فعلًا.
+    </p>
+</section>
+
+<section class="card">
+    <h2>🏅 Achievements</h2>
+    <div id="achievements">لا توجد إنجازات حتى الآن.</div>
+</section>
+
+<section class="card">
+    <h2>📜 Activity History</h2>
+
+    <div id="history">ابدأ رحلتك!</div>
+
+    <button onclick="exportData()">تصدير نسخة احتياطية</button>
+</section>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+// ==========================
+// ACHIEVEMENT SOUND
+// ==========================
+
+let audioContext = null;
+let lastSoundTime = 0;
+
+function prepareAudio() {
+    try {
+        const AudioClass =
+            window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioClass) return;
+
+        if (!audioContext) {
+            audioContext = new AudioClass();
+        }
+
+        if (audioContext.state === "suspended") {
+            audioContext.resume().catch(() => {});
+        }
+    } catch (error) {
+        console.log("Audio unavailable:", error);
+    }
+}
+
+function playAchievementSound() {
+    prepareAudio();
+
+    if (!audioContext) return;
+
+    const play = () => {
+        if (audioContext.state !== "running") return;
+
+        // منع تداخل النغمات عند حدوث مكافأتين معًا
+        const now = Date.now();
+
+        if (now - lastSoundTime < 350) return;
+        lastSoundTime = now;
+
+        const notes = [659.25, 783.99, 987.77];
+        const start = audioContext.currentTime;
+
+        notes.forEach((frequency, index) => {
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            const noteStart = start + index * 0.13;
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = frequency;
+
+            gain.gain.setValueAtTime(0.0001, noteStart);
+            gain.gain.exponentialRampToValueAtTime(
+                0.16, noteStart + 0.025
+            );
+            gain.gain.exponentialRampToValueAtTime(
+                0.0001, noteStart + 0.32
+            );
+
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+
+            oscillator.start(noteStart);
+            oscillator.stop(noteStart + 0.34);
+        });
+    };
+
+    if (audioContext.state === "suspended") {
+        audioContext.resume().then(play).catch(() => {});
+    } else {
+        play();
+    }
+}
+
+// ==========================
+// DATA & STORAGE
+// ==========================
+
+const KEY = "studyQuestData";
+
+let data = JSON.parse(localStorage.getItem(KEY)) || {
+    xp: 0,
+    totalSeconds: 0,
+    subjects: {},
+    daily: {},
+    goal: 2,
+    exams: 0,
+    examDates: {},
+    achievements: [],
+    history: [],
+    hourAwards: 0
+};
+
+const today = () => new Date().toLocaleDateString("en-CA");
+
+function save() {
+    localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+function notify(message) {
+    const box = document.getElementById("toast");
+
+    box.textContent = message;
+    box.style.display = "block";
+
+    setTimeout(() => {
+        box.style.display = "none";
+    }, 2500);
+}
+
+function history(message) {
+    data.history.unshift({
+        message,
+        date: new Date().toLocaleString("ar-EG")
+    });
+
+    data.history = data.history.slice(0, 50);
+}
+
+function addXP(points, message) {
+    data.xp += points;
+
+    history(message + " (+" + points + " XP)");
+
+    save();
+    render();
+
+    notify(message + " +" + points + " XP");
+
+    playAchievementSound();
+}
+
+// ==========================
+// TIMER
+// ==========================
+
+let focusMinutes = 25;
+let breakMinutes = 5;
+
+let remaining = 1500;
+let running = false;
+let isBreak = false;
+let interval = null;
+let lastTick = 0;
+let currentSubject = "Math";
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+
+    return String(m).padStart(2, "0") + ":" +
+           String(s).padStart(2, "0");
+}
+
+function updateClock() {
+    document.getElementById("clock").textContent =
+        formatTime(remaining);
+
+    const total = (isBreak ? breakMinutes : focusMinutes) * 60;
+
+    document.getElementById("timerProgress").style.width =
+        (100 * (1 - remaining / total)) + "%";
+}
+
+function setMode(focus, rest) {
+    if (running) {
+        notify("أوقف المؤقت أولًا");
+        return;
+    }
+
+    focusMinutes = focus;
+    breakMinutes = rest;
+    isBreak = false;
+    remaining = focusMinutes * 60;
+
+    updateClock();
+    saveTimer();
+}
+
+function recordSecond() {
+    data.totalSeconds++;
+
+    data.subjects[currentSubject] =
+        (data.subjects[currentSubject] || 0) + 1;
+
+    data.daily[today()] =
+        (data.daily[today()] || 0) + 1;
+
+    if (data.totalSeconds % 3600 === 0) {
+        data.xp += 10;
+        data.hourAwards++;
+
+        unlock(
+            "hour-" + data.hourAwards,
+            "ساعة مذاكرة #" + data.hourAwards,
+            "أكملت ساعة مذاكرة فعلية",
+            "⏱️"
+        );
+
+        history("ساعة مذاكرة مكتملة (+10 XP)");
+        notify("ساعة كاملة! +10 XP 🏆");
+
+        playAchievementSound();
+    }
+
+    checkDailyGoal();
+}
+
+function tick() {
+    if (!running) return;
+
+    const now = Date.now();
+    const elapsed = Math.floor((now - lastTick) / 1000);
+
+    if (elapsed <= 0) return;
+
+    lastTick += elapsed * 1000;
+
+    if (!isBreak) {
+        for (let i = 0; i < elapsed; i++) {
+            recordSecond();
+        }
+    }
+
+    remaining = Math.max(0, remaining - elapsed);
+
+    updateClock();
+    save();
+    render();
+
+    if (remaining === 0) {
+        running = false;
+
+        clearInterval(interval);
+        interval = null;
+
+        document.getElementById("timerStatus").textContent =
+            "انتهت الجلسة! أحسنت.";
+
+        notify("انتهت الجلسة!");
+
+        if (!isBreak) {
+            playAchievementSound();
+        }
+
+        saveTimer();
+        save();
+        render();
+    }
+}
+
+function startTimer() {
+    if (running) return;
+
+    prepareAudio();
+
+    if (remaining <= 0) {
+        remaining = (isBreak ? breakMinutes : focusMinutes) * 60;
+    }
+
+    currentSubject = document.getElementById("subject").value;
+
+    running = true;
+    lastTick = Date.now();
+
+    interval = setInterval(tick, 250);
+
+    document.getElementById("timerStatus").textContent =
+        isBreak ? "وقت الراحة" : "المذاكرة جارية...";
+
+    saveTimer();
+}
+
+function pauseTimer() {
+    if (!running) return;
+
+    tick();
+
+    running = false;
+
+    clearInterval(interval);
+    interval = null;
+
+    saveTimer();
+
+    document.getElementById("timerStatus").textContent =
+        "المؤقت متوقف مؤقتًا.";
+}
+
+function resetTimer() {
+    if (running) tick();
+
+    running = false;
+
+    clearInterval(interval);
+    interval = null;
+
+    remaining = (isBreak ? breakMinutes : focusMinutes) * 60;
+
+    updateClock();
+    saveTimer();
+
+    document.getElementById("timerStatus").textContent =
+        "الجلسة انتهت. وقتك المسجل محفوظ.";
+}
+
+function startBreak() {
+    if (running) {
+        notify("أوقف المؤقت أولًا");
+        return;
+    }
+
+    isBreak = !isBreak;
+
+    remaining = (isBreak ? breakMinutes : focusMinutes) * 60;
+
+    updateClock();
+
+    document.getElementById("timerStatus").textContent =
+        isBreak ? "وضع الاستراحة" : "وضع التركيز";
+
+    saveTimer();
+}
+
+// ==========================
+// TIMER PERSISTENCE
+// ==========================
+
+function saveTimer() {
+    localStorage.setItem("studyQuestTimer", JSON.stringify({
+        remaining,
+        running,
+        isBreak,
+        focusMinutes,
+        breakMinutes,
+        lastTick,
+        currentSubject
+    }));
+}
+
+function restoreTimer() {
+    const saved = JSON.parse(
+        localStorage.getItem("studyQuestTimer") || "null"
+    );
+
+    if (!saved) return;
+
+    remaining = saved.remaining;
+    isBreak = saved.isBreak;
+    focusMinutes = saved.focusMinutes;
+    breakMinutes = saved.breakMinutes;
+    currentSubject = saved.currentSubject;
+
+    if (saved.running) {
+        running = true;
+        lastTick = saved.lastTick;
+
+        tick();
+
+        if (running) {
+            interval = setInterval(tick, 250);
+        }
+    }
+
+    updateClock();
+}
+
+// ==========================
+// XP & REWARDS
+// ==========================
+
+function reward(type) {
+
+    if (type === "homework") {
+        addXP(15, "واجب كامل مع التصحيح");
+    }
+
+    if (type === "lesson") {
+        addXP(20, "إنهاء درس وفهمه");
+    }
+
+    if (type === "review") {
+        addXP(10, "مراجعة أخطاء امتحان سابق");
+    }
+
+    if (type === "exam") {
+
+        prepareAudio();
+
+        const input = prompt(
+            "اكتب درجتك كنسبة مئوية من 0 إلى 100، أو اتركها فارغة:"
+        );
+
+        if (input === null) return;
+
+        const score = input.trim() === "" ? null : Number(input);
+
+        if (score !== null &&
+            (!Number.isFinite(score) || score < 0 || score > 100)) {
+            notify("اكتب نسبة صحيحة من 0 إلى 100");
+            return;
+        }
+
+        data.exams++;
+        data.xp += 25;
+
+        history("إنهاء امتحان شامل (+25 XP)");
+
+        if (score !== null && score >= 90) {
+            data.xp += 15;
+            history("درجة 90% أو أكثر (+15 XP)");
+        }
+
+        const day = today();
+
+        data.examDates[day] = (data.examDates[day] || 0) + 1;
+
+        if (data.examDates[day] === 2) {
+            data.xp += 10;
+            history("إنهاء امتحانين في يوم واحد (+10 XP)");
+        }
+
+        checkAchievements();
+        save();
+        render();
+
+        notify("تم تسجيل الامتحان بنجاح!");
+
+        playAchievementSound();
+    }
+}
+
+// ==========================
+// ACHIEVEMENTS
+// ==========================
+
+function unlock(id, title, description, emoji) {
+
+    if (data.achievements.some(a => a.id === id)) return;
+
+    data.achievements.push({
+        id,
+        title,
+        description,
+        emoji,
+        date: new Date().toLocaleDateString("ar-EG")
+    });
+
+    history("إنجاز جديد: " + title);
+}
+
+function checkDailyGoal() {
+
+    const seconds = data.daily[today()] || 0;
+
+    if (seconds >= data.goal * 3600 &&
+        !data.daily[today() + "_awarded"]) {
+
+        data.daily[today() + "_awarded"] = true;
+
+        data.xp += 10;
+
+        history("تحقيق هدف اليوم (+10 XP)");
+
+        notify("حققت هدفك اليومي! +10 XP");
+
+        playAchievementSound();
+    }
+}
+
+function checkAchievements() {
+
+    if (data.exams >= 10) {
+        unlock("exam10", "Exam Hunter",
+            "أنهيت 10 امتحانات", "🎯");
+    }
+
+    if (data.totalSeconds >= 36000) {
+        unlock("tenHours", "10 Hours",
+            "وصلت إلى 10 ساعات مذاكرة", "🔥");
+    }
+
+    if (data.totalSeconds >= 180000) {
+        unlock("fiftyHours", "50 Hours",
+            "وصلت إلى 50 ساعة مذاكرة", "🏆");
+    }
+}
+
+// ==========================
+// LEVEL SYSTEM
+// ==========================
+
+const levels = [
+    ["Beginner", 0, 100],
+    ["Learner", 100, 250],
+    ["Achiever", 250, 500],
+    ["Advanced", 500, 850],
+    ["Expert", 850, 1300],
+    ["Master", 1300, 2000],
+    ["Elite", 2000, 3000]
+];
+
+// ==========================
+// DAILY GOAL
+// ==========================
+
+function saveGoal() {
+    const value = Math.max(
+        1,
+        Math.min(12,
+            Number(document.getElementById("dailyGoal").value) || 2
+        )
+    );
+
+    data.goal = value;
+
+    save();
+    render();
+
+    notify("تم حفظ الهدف اليومي");
+}
+
+// ==========================
+// DASHBOARD
+// ==========================
+
+function totalTime(seconds) {
+    return Math.floor(seconds / 3600) + "h " +
+        String(Math.floor(seconds % 3600 / 60)).padStart(2, "0") + "m";
+}
+
+function render() {
+
+    document.getElementById("xp").textContent = data.xp;
+
+    document.getElementById("totalHours").textContent =
+        totalTime(data.totalSeconds);
+
+    document.getElementById("examCount").textContent = data.exams;
+
+    document.getElementById("achievementCount").textContent =
+        data.achievements.length;
+
+    let level = levels[0];
+
+    for (const item of levels) {
+        if (data.xp >= item[1]) level = item;
+    }
+
+    document.getElementById("level").textContent = level[0];
+
+    document.getElementById("levelText").textContent =
+        data.xp + " / " + level[2] + " XP";
+
+    document.getElementById("levelProgress").style.width =
+        Math.min(100,
+            (data.xp - level[1]) /
+            (level[2] - level[1]) * 100
+        ) + "%";
+
+    document.getElementById("dailyGoal").value = data.goal;
+
+    const dailySeconds = data.daily[today()] || 0;
+
+    document.getElementById("dailyProgressText").textContent =
+        totalTime(dailySeconds) + " / " + data.goal + " ساعة";
+
+    document.getElementById("dailyProgress").style.width =
+        Math.min(100,
+            dailySeconds / (data.goal * 3600) * 100
+        ) + "%";
+
+    renderSubjects();
+    renderAchievements();
+    renderHistory();
+}
+
+function renderSubjects() {
+
+    const names = [
+        "Math", "Science", "English",
+        "Arabic", "Studies", "Other"
+    ];
+
+    const max = Math.max(
+        1,
+        ...names.map(n => data.subjects[n] || 0)
+    );
+
+    document.getElementById("subjects").innerHTML =
+        names.map(name => {
+
+            const seconds = data.subjects[name] || 0;
+            const percent = seconds / max * 100;
+
+            return `
+            <div class="subject">
+                <div class="row">
+                    <b>${name}</b>
+                    <span>${totalTime(seconds)}</span>
+                </div>
+                <div class="subject-bar">
+                    <div style="width:${percent}%"></div>
+                </div>
+            </div>
+            `;
+        }).join("");
+}
+
+function renderAchievements() {
+
+    const box = document.getElementById("achievements");
+
+    if (!data.achievements.length) {
+        box.textContent = "أول إنجاز مستنيك!";
+        return;
+    }
+
+    box.innerHTML = data.achievements.slice().reverse().map(a => `
+        <div class="achievement">
+            ${a.emoji} <b>${a.title}</b>
+            <br>
+            <small>${a.description} — ${a.date}</small>
+        </div>
+    `).join("");
+}
+
+function renderHistory() {
+
+    const box = document.getElementById("history");
+
+    if (!data.history.length) {
+        box.textContent = "ابدأ رحلتك!";
+        return;
+    }
+
+    box.innerHTML = data.history.map(h => `
+        <div class="history-item">
+            ${h.message}
+            <small>${h.date}</small>
+        </div>
+    `).join("");
+}
+
+// ==========================
+// BACKUP
+// ==========================
+
+function exportData() {
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "study-quest-backup.json";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+// ==========================
+// INITIALIZATION
+// ==========================
+
+restoreTimer();
+updateClock();
+render();
+
+setInterval(() => {
+    if (running) {
+        tick();
+        saveTimer();
+    }
+}, 1000);
+
+window.addEventListener("beforeunload", () => {
+    if (running) {
+        tick();
+        saveTimer();
+    }
+});
+
+</script>
+
+</body>
+</html>
