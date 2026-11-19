@@ -164,6 +164,18 @@ select, input {
     color: #aab3c5;
     margin-top: 5px;
 }
+    .history-toggle {
+    display: block;
+    margin: 15px auto 5px;
+    min-width: 140px;
+    background: #303c55;
+    border: 1px solid #465574;
+    transition: .2s;
+}
+
+.history-toggle:hover {
+    background: #405071;
+}
 
 #toast {
     position: fixed;
@@ -962,6 +974,18 @@ function renderAchievements() {
     `).join("");
 }
 
+
+// ==========================
+// ACTIVITY HISTORY
+// ==========================
+
+let historyExpanded = false;
+
+function toggleHistory() {
+    historyExpanded = !historyExpanded;
+    renderHistory();
+}
+
 function renderHistory() {
 
     const box = document.getElementById("history");
@@ -971,13 +995,33 @@ function renderHistory() {
         return;
     }
 
-    box.innerHTML = data.history.map(h => `
+    const visibleHistory = historyExpanded
+        ? data.history
+        : data.history.slice(0, 5);
+
+    box.innerHTML = visibleHistory.map(h => `
         <div class="history-item">
             ${h.message}
             <small>${h.date}</small>
         </div>
     `).join("");
+
+    if (data.history.length > 5) {
+
+        const button = document.createElement("button");
+
+        button.className = "history-toggle secondary";
+
+        button.textContent = historyExpanded
+            ? "Show Less"
+            : `Show More (${data.history.length - 5})`;
+
+        button.onclick = toggleHistory;
+
+        box.appendChild(button);
+    }
 }
+
 
 // ==========================
 // BACKUP
